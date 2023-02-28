@@ -1,7 +1,7 @@
 <template>
   <div class="row q-col-gutter-md relative-position">
     <div v-for="account in accounts" :key="account.id" class="col-4">
-      <q-card class="my-card relative-position" style="background: red;">
+      <q-card class="my-card relative-position">
 
         <q-btn class="absolute-top-right" style="top: 8px;right: 8px; z-index: 1" size="sm" unelevated round dense icon="more_vert">
           <q-menu style="z-index: 1" anchor="top right" self="top right">
