@@ -4,6 +4,7 @@ import HistoryPage from '@/views/history/HistoryPage.vue'
 import CategoriesPage from '@/views/categories/CategoriesPage.vue'
 import GoalsPage from '@/views/goals/GoalsPage.vue'
 import ObligationsPage from '@/views/obligations/ObligationsPage.vue'
+import CreateNote from '@/views/createNote/CreateNote.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -34,6 +35,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/obligations',
     name: 'obligations',
     component: ObligationsPage,
+  },
+  {
+    path: '/create-note',
+    name: 'create-note',
+    component: CreateNote,
   },
 ]
 

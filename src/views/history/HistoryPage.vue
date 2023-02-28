@@ -175,6 +175,7 @@ const columns = reactive([
   { name: 'value', align: 'left', label: 'Сумма', field: 'value', sortable: true },
   { name: 'currency', align: 'left', label: 'Валюта', field: 'currency' },
   { name: 'category', align: 'left', label: 'Категория', field: 'category' },
+  { name: 'goal', align: 'left', label: 'Цель', field: 'goal' },
   { name: 'comment', align: 'left', label: 'Комментарий', field: 'comment' },
 ]);
 const initRows = reactive([
@@ -184,6 +185,7 @@ const initRows = reactive([
     value: 15000,
     currency: '$',
     category: 'Продукты',
+    goal: '-',
     comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
   },
   {
@@ -192,6 +194,7 @@ const initRows = reactive([
     value: 3000,
     currency: '$',
     category: 'Зарплата',
+    goal: '-',
     comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
   },
   {
@@ -200,6 +203,7 @@ const initRows = reactive([
     value: 13000,
     currency: '₺',
     category: 'Бытовые расходы',
+    goal: '-',
     comment: '',
   },
   {
@@ -208,6 +212,7 @@ const initRows = reactive([
     value: 4000,
     currency: '₽',
     category: 'Гулянки',
+    goal: '-',
     comment: 'Комментарий 2',
   },
   {
@@ -216,6 +221,7 @@ const initRows = reactive([
     value: 5000,
     currency: '$',
     category: 'Гулянки',
+    goal: '-',
     comment: 'Комментарий 2',
   },
   {
@@ -224,6 +230,7 @@ const initRows = reactive([
     value: 300,
     currency: '$',
     category: 'Продукты',
+    goal: '-',
     comment: 'Комментарий 2',
   },
   {
@@ -232,6 +239,7 @@ const initRows = reactive([
     value: 8000,
     currency: '₺',
     category: 'Продукты',
+    goal: '-',
     comment: '',
   },
   {
@@ -240,6 +248,7 @@ const initRows = reactive([
     value: 3000,
     currency: '₺',
     category: 'Продукты',
+    goal: '-',
     comment: '',
   },
   {
@@ -247,8 +256,9 @@ const initRows = reactive([
     type: 'Расход',
     value: 2500,
     currency: '₽',
-    category: 'Бытовые расходы',
-    comment: '',
+    category: 'Обязательства',
+    goal: '-',
+    comment: 'Аренда квартиры',
   },
 ]);
 let rows = reactive([
@@ -258,6 +268,7 @@ let rows = reactive([
     value: 15000,
     currency: '$',
     category: 'Продукты',
+    goal: '-',
     comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
   },
   {
@@ -266,6 +277,7 @@ let rows = reactive([
     value: 3000,
     currency: '$',
     category: 'Зарплата',
+    goal: '-',
     comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
   },
   {
@@ -274,6 +286,7 @@ let rows = reactive([
     value: 13000,
     currency: '₺',
     category: 'Бытовые расходы',
+    goal: '-',
     comment: '',
   },
   {
@@ -282,6 +295,7 @@ let rows = reactive([
     value: 4000,
     currency: '₽',
     category: 'Гулянки',
+    goal: '-',
     comment: 'Комментарий 2',
   },
   {
@@ -290,6 +304,7 @@ let rows = reactive([
     value: 5000,
     currency: '$',
     category: 'Гулянки',
+    goal: '-',
     comment: 'Комментарий 2',
   },
   {
@@ -298,6 +313,7 @@ let rows = reactive([
     value: 300,
     currency: '$',
     category: 'Продукты',
+    goal: '-',
     comment: 'Комментарий 2',
   },
   {
@@ -306,6 +322,7 @@ let rows = reactive([
     value: 8000,
     currency: '₺',
     category: 'Продукты',
+    goal: '-',
     comment: '',
   },
   {
@@ -314,6 +331,7 @@ let rows = reactive([
     value: 3000,
     currency: '₺',
     category: 'Продукты',
+    goal: '-',
     comment: '',
   },
   {
@@ -321,8 +339,9 @@ let rows = reactive([
     type: 'Расход',
     value: 2500,
     currency: '₽',
-    category: 'Бытовые расходы',
-    comment: '',
+    category: 'Обязательства',
+    goal: '-',
+    comment: 'Аренда квартиры',
   },
 ]);
 
@@ -348,7 +367,7 @@ const filterOptions = reactive({
   minSum: '',
   maxSum: '',
 });
-const categories = reactive(['Бытовые расходы', 'Аренда квартиры', 'Коммуналка', 'Продукты', 'Еда', 'Алкоголь', 'Гулянки', 'Бары', 'Рестораны', 'Зарплата']);
+const categories = reactive(['Обязательства', 'Бытовые расходы', 'Аренда квартиры', 'Коммуналка', 'Продукты', 'Еда', 'Алкоголь', 'Гулянки', 'Бары', 'Рестораны', 'Зарплата']);
 
 function resetFilterOptions () {
   Object.keys(filterOptions).forEach((key) => {

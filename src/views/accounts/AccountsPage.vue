@@ -1,29 +1,32 @@
 <template>
-  <div class="row q-col-gutter-md relative-position">
-    <div v-for="account in accounts" :key="account.id" class="col-4">
-      <q-card class="my-card relative-position">
+  <div class="row">
+    <div class="row column col-md-3 col-12 q-col-gutter-md relative-position">
+      <div v-for="account in accounts" :key="account.id">
+        <q-card class="my-card relative-position">
 
-        <q-btn class="absolute-top-right" style="top: 8px;right: 8px; z-index: 1" size="sm" unelevated round dense icon="more_vert">
-          <q-menu style="z-index: 1" anchor="top right" self="top right">
-            <q-list>
-              <q-item @click="editAccountName(account)" clickable v-close-popup>
-                <q-item-section>Редактировать название счета</q-item-section>
-              </q-item>
-              <q-item @click="deleteAccount(account.id)" clickable v-close-popup>
-                <q-item-section>Удалить счет</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+          <q-btn class="absolute-top-right" style="top: 8px;right: 8px; z-index: 1" size="sm" unelevated round dense icon="more_vert">
+            <q-menu style="z-index: 1" anchor="top right" self="top right">
+              <q-list>
+                <q-item @click="editAccountName(account)" clickable v-close-popup>
+                  <q-item-section>Редактировать название счета</q-item-section>
+                </q-item>
+                <q-item @click="deleteAccount(account.id)" clickable v-close-popup>
+                  <q-item-section>Удалить счет</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
 
-        <q-card-section>
-          <div class="text-h6 q-pr-md ellipsis">{{ account.accountName }}</div>
-          <div class="text-h5 text-weight-bold q-mb-md">{{ `${account.currentValue}${getIconCurrency(account.currency)}` }}</div>
-          <div>Траты в текущем месяце:</div>
-          <div class="text-weight-bold">{{ `500${getIconCurrency(account.currency)}` }}</div>
-        </q-card-section>
-      </q-card>
+          <q-card-section>
+            <div class="text-h6 q-pr-md ellipsis">{{ account.accountName }}</div>
+            <div class="text-h5 text-weight-bold q-mb-md">{{ `${account.currentValue}${getIconCurrency(account.currency)}` }}</div>
+            <div>Траты в текущем месяце:</div>
+            <div class="text-weight-bold">{{ `500${getIconCurrency(account.currency)}` }}</div>
+          </q-card-section>
+        </q-card>
+      </div>
     </div>
+    <div class="col-auto"></div>
   </div>
 
   <add-button

@@ -100,7 +100,7 @@ const menuList = [
   {
     icon: 'add',
     label: 'Новая запись',
-    name: 'add-note',
+    name: 'create-note',
     separator: true
   },
 ]
