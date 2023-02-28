@@ -9,5 +9,9 @@ module.exports = defineConfig({
       importStrategy: 'kebab',
       rtlSupport: false
     }
-  }
+  },
+
+  publicPath: process.env.NODE_ENV === 'production'
+      ? '/crm-buh/'
+      : '/'
 })
