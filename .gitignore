@@ -1,6 +1,8 @@
 .DS_Store
 node_modules
 #/dist
+.travis.yml
+deploy.sh
 
 
 # local env files
