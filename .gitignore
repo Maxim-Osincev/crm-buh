@@ -2,7 +2,7 @@
 node_modules
 /dist
 .travis.yml
-.deploy.sh
+deploy.sh
 
 
 # local env files
