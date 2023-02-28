@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test": "jest"
+    "test": "jest",
+    "public_on_pages": "bash ./deploy.sh"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
