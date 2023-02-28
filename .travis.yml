@@ -6,7 +6,7 @@ script: npm run build
 deploy:
   provider: pages
   skip_cleanup: true
-  github_token: $GITHUB_TOKEN
+  github_token: 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
   local_dir: dist
   on:
     branch: master
