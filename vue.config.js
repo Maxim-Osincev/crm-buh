@@ -13,5 +13,9 @@ module.exports = defineConfig({
 
   publicPath: process.env.NODE_ENV === 'production'
       ? '/crm-buh/'
-      : '/'
+      : '/',
+
+  devServer: {
+    proxy: 'http://localhost:5000'
+  }
 })
