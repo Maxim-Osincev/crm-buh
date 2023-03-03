@@ -32,7 +32,7 @@
 
         <q-card-actions align="right" class="bg-white text-teal">
           <q-btn flat label="Отмена" v-close-popup />
-          <q-btn flat label="Создать" v-close-popup @click="addCategory" />
+          <q-btn flat label="Создать" v-close-popup @click="controller.addCategory()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -46,49 +46,21 @@ import {CategoriesController} from "@/views/categories/CategoriesController";
 import {Category} from "@/views/categories/CategoriesTypes";
 
 const categoriesNodes = ref<Category[]>([]);
-const model = new CategoriesModel(categoriesNodes);
-const controller = new CategoriesController(model);
-
-controller.getCurrentCategories();
-
 const showModal = ref<boolean>(false);
 const nameNewCategory = ref<string>('');
 const parentNode = ref<string>('');
 const expandedNodes = ref<string[]>([]);
+
+const model = new CategoriesModel(categoriesNodes, parentNode, nameNewCategory);
+const controller = new CategoriesController(model);
+
+controller.getCurrentCategories();
 
 watch(showModal, (value: boolean): void => {
   if (!value) {
     parentNode.value = '';
   }
 })
-
-function addCategory (): void {
-  if (!parentNode.value) {
-    categoriesNodes.value.push({
-      label: nameNewCategory.value,
-      children: [],
-    });
-  } else {
-    categoriesNodes.value = editCategories(categoriesNodes.value);
-  }
-  nameNewCategory.value = '';
-}
-
-function editCategories (arr: any[]): Category[] {
-  return arr.map((el) => {
-    if (!el.children) {
-      el.children = [];
-    }
-
-    if (el.label === parentNode.value) {
-      el.children.push({ label: nameNewCategory.value, children: [] });
-    } else if (el.children.length > 0) {
-      el.children = editCategories(el.children);
-    }
-
-    return el;
-  });
-}
 
 function clickParentNode (parentNodeLabel: string): void {
   showModal.value = true;

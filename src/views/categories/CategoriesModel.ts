@@ -3,9 +3,13 @@ import {Ref} from "vue";
 
 export class CategoriesModel {
     categories: Ref<Category[]>
+    parentNode: Ref<string>
+    nameNewCategory: Ref<string>
 
-    constructor (categories: Ref<Category[]>) {
+    constructor (categories: Ref<Category[]>, parentNode: Ref<string>, nameNewCategory: Ref<string>) {
         this.categories = categories;
+        this.parentNode = parentNode;
+        this.nameNewCategory = nameNewCategory;
     }
 
     getCurrentCategories (): void {
@@ -38,5 +42,33 @@ export class CategoriesModel {
                 ]
             }
         ]
+    }
+
+    addCategory (): void {
+        if (!this.parentNode.value) {
+            this.categories.value.push({
+                label: this.nameNewCategory.value,
+                children: [],
+            });
+        } else {
+            this.categories.value = this.editCategories(this.categories.value);
+        }
+        this.nameNewCategory.value = '';
+    }
+
+    editCategories (arr: any[]): Category[] {
+        return arr.map((el) => {
+            if (!el.children) {
+                el.children = [];
+            }
+
+            if (el.label === this.parentNode.value) {
+                el.children.push({ label: this.nameNewCategory.value, children: [] });
+            } else if (el.children.length > 0) {
+                el.children = this.editCategories(el.children);
+            }
+
+            return el;
+        });
     }
 }

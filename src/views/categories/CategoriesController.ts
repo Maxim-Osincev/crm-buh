@@ -11,4 +11,7 @@ export class CategoriesController {
         this.model.getCurrentCategories();
     }
 
+    addCategory (): void {
+        this.model.addCategory();
+    }
 }
