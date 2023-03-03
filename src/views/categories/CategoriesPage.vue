@@ -40,41 +40,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue';
+import { ref, watch } from 'vue';
+import {CategoriesModel} from "@/views/categories/CategoriesModel";
+import {CategoriesController} from "@/views/categories/CategoriesController";
+import {Category} from "@/views/categories/CategoriesTypes";
 
-interface Category {
-  label: string,
-  children?: Category[],
-}
-const categoriesNodes = ref<Category[]>([
-  {
-    label: 'Бытовые расходы',
-    children: [
-      { label: 'Аренда квартиры', },
-      { label: 'Коммуналка', },
-    ]
-  },
-  {
-    label: 'Продукты',
-    children: [
-      {
-        label: 'Еда',
-        children: [
-          { label: 'Сладости', }
-        ],
-      },
-      { label: 'Алкоголь', },
-    ]
-  },
-  {
-    label: 'Гулянки',
-    children: [
-      { label: 'Бары', },
-      { label: 'Рестораны', },
-      { label: 'Кальанные', },
-    ]
-  }
-]);
+const categoriesNodes = ref<Category[]>([]);
+const model = new CategoriesModel(categoriesNodes);
+const controller = new CategoriesController(model);
+
+controller.getCurrentCategories();
+
 const showModal = ref<boolean>(false);
 const nameNewCategory = ref<string>('');
 const parentNode = ref<string>('');
@@ -93,7 +69,7 @@ function addCategory (): void {
       children: [],
     });
   } else {
-    categoriesNodes.value = reactive(editCategories(categoriesNodes.value));
+    categoriesNodes.value = editCategories(categoriesNodes.value);
   }
   nameNewCategory.value = '';
 }
