@@ -178,7 +178,7 @@ const columns = reactive([
   { name: 'goal', align: 'left', label: 'Цель', field: 'goal' },
   { name: 'comment', align: 'left', label: 'Комментарий', field: 'comment' },
 ]);
-const initRows = reactive([
+const initRows = ref([
   {
     date: '21.02.2023',
     type: 'Приход',
@@ -261,7 +261,7 @@ const initRows = reactive([
     comment: 'Аренда квартиры',
   },
 ]);
-let rows = reactive([
+let rows = ref([
   {
     date: '21.02.2023',
     type: 'Приход',
@@ -351,12 +351,12 @@ let pagination = ref({
   page: 1,
   rowsPerPage: 15,
 });
-const pagesNumber = computed(() => Math.ceil(rows.length / pagination.value.rowsPerPage));
+const pagesNumber = computed(() => Math.ceil(rows.value.length / pagination.value.rowsPerPage));
 
 
 const searchField = ref('');
 watch(searchField, (value) => {
-  rows = reactive(initRows.filter((el) => el.comment.toLowerCase().startsWith(value)));
+  rows.value = ref(initRows.value.filter((el) => el.comment.toLowerCase().startsWith(value)));
 })
 
 const filterOptions = reactive({
@@ -386,7 +386,7 @@ function resetFilterOptions () {
         break;
     }
   });
-  rows = initRows;
+  rows.value = initRows.value;
   applyFilterOptions();
 }
 
@@ -396,10 +396,10 @@ const isActiveFilters = computed(() => {
 });
 
 function applyFilterOptions () {
-  rows = initRows;
+  rows.value = initRows.value;
 
   if (filterOptions.startDate) {
-    rows = rows.filter((el) => {
+    rows.value = rows.value.filter((el) => {
       const rowDate = moment(el.date, 'DD.MM.YYYY');
       const filterStartDate = moment(filterOptions.startDate, 'DD.MM.YYYY');
 
@@ -408,7 +408,7 @@ function applyFilterOptions () {
   }
 
   if (filterOptions.endDate) {
-    rows = rows.filter((el) => {
+    rows.value = rows.value.filter((el) => {
       const rowDate = moment(el.date, 'DD.MM.YYYY');
       const filterEndDate = moment(filterOptions.endDate, 'DD.MM.YYYY');
 
@@ -417,23 +417,23 @@ function applyFilterOptions () {
   }
 
   if (filterOptions.categories.length > 0) {
-    rows = rows.filter((row) => filterOptions.categories.includes(row.category));
+    rows.value = rows.value.filter((row) => filterOptions.categories.includes(row.category));
   }
 
   if (filterOptions.currencies.length > 0) {
     const currenciesNames = currencies.filter((el) => filterOptions.currencies.includes(el.name)).map((el) => el.icon);
 
-    rows = rows.filter((row) => {
+    rows.value = rows.value.filter((row) => {
       return currenciesNames.includes(row.currency);
     });
   }
 
   if (filterOptions.minSum) {
-    rows = rows.filter((el) => Number(el.value) >= Number(filterOptions.minSum));
+    rows.value = rows.value.filter((el) => Number(el.value) >= Number(filterOptions.minSum));
   }
 
   if (filterOptions.maxSum) {
-    rows = rows.filter((el) => Number(el.value) <= Number(filterOptions.maxSum));
+    rows.value = rows.value.filter((el) => Number(el.value) <= Number(filterOptions.maxSum));
   }
 
   pagination.value = { ...pagination.value };
@@ -485,14 +485,14 @@ function getListCurrentCurrency (arr, currencyChart) {
   dataConsumption.labels = Object.keys(categoriesMatrix['Расход']);
   dataConsumption.datasets[0].data = Object.values(categoriesMatrix['Расход']);
 }
-getListCurrentCurrency(rows, currencyChart.value);
+getListCurrentCurrency(rows.value, currencyChart.value);
 
 watch(currencyChart, (value) => updateList(value));
 
 function updateList (value) {
   categoriesMatrix['Приход'] = {};
   categoriesMatrix['Расход'] = {};
-  getListCurrentCurrency(rows, value);
+  getListCurrentCurrency(rows.value, value);
 }
 
 </script>

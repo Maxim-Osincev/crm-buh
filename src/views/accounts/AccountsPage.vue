@@ -10,7 +10,7 @@
                 <q-item @click="editAccountName(account)" clickable v-close-popup>
                   <q-item-section>Редактировать название счета</q-item-section>
                 </q-item>
-                <q-item @click="deleteAccount(account.id)" clickable v-close-popup>
+                <q-item @click="controller.deleteAccount(account.id)" clickable v-close-popup>
                   <q-item-section>Удалить счет</q-item-section>
                 </q-item>
               </q-list>
@@ -46,7 +46,7 @@
 
       <q-card-actions align="right" class="bg-white text-teal">
         <q-btn flat label="Отмена" v-close-popup />
-        <q-btn @click="createAccount" flat label="Создать" v-close-popup />
+        <q-btn @click="controller.createAccount(modalCreateFields)" flat label="Создать" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -62,29 +62,19 @@
       </q-card-section>
 
       <q-card-actions align="right" class="bg-white text-teal">
-        <q-btn @click="saveAccountName" flat label="Сохранить" v-close-popup />
+        <q-btn @click="controller.saveAccountName(editingAccount)" flat label="Сохранить" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { currencies } from "@/views/currenciesList";
 import AddButton from '@/components/buttons/AddButton';
-
-interface Account {
-  id: number,
-  currency: string | null,
-  currentValue: number,
-  accountName: string,
-}
-
-interface EditingAccountType {
-  accountName: string,
-  currency: string | null,
-  currentValue: number,
-}
+import {AccountsModel} from "@/views/accounts/AccountsModel";
+import {AccountsController} from "@/views/accounts/AccountsController";
+import {Account, EditingAccountType} from "@/views/accounts/AccountsTypes";
 
 const accounts = ref<Account[]>([]);
 const showModalCreateAccount = ref<boolean>(false);
@@ -96,51 +86,14 @@ const modalCreateFields = ref<EditingAccountType>({
   currentValue: 0,
 });
 
-onMounted(() => {
-  accounts.value = getCurrentAccounts();
-})
+const model = new AccountsModel(accounts);
+const controller = new AccountsController(model);
 
-function getCurrentAccounts (): Account[] {
-  return [
-    {
-      id: 1,
-      currency: 'Доллар',
-      currentValue: 150,
-      accountName: 'Долларовый счет',
-    },
-    {
-      id: 2,
-      currency: 'Лира',
-      currentValue: 10000,
-      accountName: 'Лировый счет',
-    },
-    {
-      id: 3,
-      currency: 'Рубль',
-      currentValue: 3000,
-      accountName: 'Рублевый счет',
-    },
-  ]
-}
+controller.getCurrentAccounts();
 
 function editAccountName (account: Account): void {
   showModalAccountName.value = true;
   editingAccount.value = { ...account };
-}
-
-function saveAccountName (): void {
-  const { id } = editingAccount.value as Account;
-  accounts.value.forEach(el => {
-    if (el.id === id) { el.accountName =  (editingAccount.value as Account).accountName}
-  })
-}
-
-function deleteAccount (id: number): void {
-  accounts.value = accounts.value.filter(el => el.id !== id);
-}
-
-function createAccount (): void {
-  accounts.value.push({ id: accounts.value.length + 1, ...modalCreateFields.value });
 }
 
 function clearFieldsModal (): void {
