@@ -1,48 +1,22 @@
-import {Ref} from "vue";
 import {Account, EditingAccountType} from "@/views/accounts/AccountsTypes";
+import axios from "axios";
 
 export class AccountsModel {
-    accounts: Ref<Account[]>
 
-    constructor(accounts: Ref<Account[]>) {
-        this.accounts = accounts;
+    getCurrentAccounts (): Promise<Account[]> {
+        return axios.get('/accounts').then(res => res.data);
     }
 
-    getCurrentAccounts (): void {
-        this.accounts.value = [
-            {
-                id: 1,
-                currency: 'Доллар',
-                currentValue: 150,
-                accountName: 'Долларовый счет',
-            },
-            {
-                id: 2,
-                currency: 'Лира',
-                currentValue: 10000,
-                accountName: 'Лировый счет',
-            },
-            {
-                id: 3,
-                currency: 'Рубль',
-                currentValue: 3000,
-                accountName: 'Рублевый счет',
-            },
-        ]
+    createAccount (data: EditingAccountType): Promise<Account[]> {
+        return axios.patch('/accounts', data);
     }
 
-    createAccount (data: EditingAccountType): void {
-        this.accounts.value.push({ id: this.accounts.value.length + 1, ...data });
+    deleteAccount (id: number): Promise<Account[]> {
+        return axios.delete('accounts', { data: { id: id } });
     }
 
-    deleteAccount (id: number): void {
-        this.accounts.value = this.accounts.value.filter(el => el.id !== id);
-    }
-
-    saveAccountName (editingAccount: Account): void {
+    editAccount (editingAccount: Account): Promise<Account[]> {
         const { id } = editingAccount as Account;
-        this.accounts.value.forEach(el => {
-            if (el.id === id) { el.accountName =  (editingAccount as Account).accountName}
-        })
+        return axios.patch(`/accounts/${id}`, editingAccount);
     }
 }

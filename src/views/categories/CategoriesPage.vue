@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div v-if="loading" class="absolute-full z-max" style="background: rgba(255,255,255,0.8)">
+      <q-spinner
+          class="absolute-center"
+          color="primary"
+          size="3em"
+          :thickness="2"
+      />
+    </div>
     <q-tree
         :nodes="categoriesNodes"
         node-key="label"
@@ -32,7 +40,7 @@
 
         <q-card-actions align="right" class="bg-white text-teal">
           <q-btn flat label="Отмена" v-close-popup />
-          <q-btn flat label="Создать" v-close-popup @click="controller.addCategory()" />
+          <q-btn flat label="Создать" v-close-popup @click="addCategory" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -51,10 +59,26 @@ const nameNewCategory = ref<string>('');
 const parentNode = ref<string>('');
 const expandedNodes = ref<string[]>([]);
 
-const model = new CategoriesModel(categoriesNodes, parentNode, nameNewCategory);
+const model = new CategoriesModel();
 const controller = new CategoriesController(model);
 
-controller.getCurrentCategories();
+const loading = ref<boolean>(false);
+
+function getCurrentCategories () {
+  loading.value = true;
+  controller.getCurrentCategories().then(data => {
+    categoriesNodes.value = data;
+    loading.value = false;
+  });
+}
+getCurrentCategories();
+
+function addCategory () {
+  controller.addCategory(nameNewCategory.value, parentNode.value).then(() => {
+    nameNewCategory.value = '';
+    getCurrentCategories();
+  })
+}
 
 watch(showModal, (value: boolean): void => {
   if (!value) {

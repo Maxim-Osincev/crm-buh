@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div v-if="loading" class="absolute-full z-max" style="background: rgba(255,255,255,0.8)">
+      <q-spinner
+          class="absolute-center"
+          color="primary"
+          size="3em"
+          :thickness="2"
+      />
+    </div>
     <div class="row justify-end items-center q-mb-md q-gutter-md">
       <q-input v-model="searchField" type="search" dense label="Поиск" :input-style="{ fontSize: '16px' }">
         <template v-slot:append>
@@ -129,7 +137,7 @@
                   <q-item clickable v-close-popup>
                     <q-item-section>Добавить комментарий</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup>
+                  <q-item clickable v-close-popup @click="deleteHistoryRow(props.row.id)">
                     <q-item-section>Удалить запись</q-item-section>
                   </q-item>
                 </q-list>
@@ -152,347 +160,47 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch } from 'vue';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, LinearScale } from 'chart.js';
-import { Doughnut } from 'vue-chartjs';
-import { options } from './HistoryChartOptions';
+import { ref } from 'vue';
 import { currencies } from '@/views/currenciesList';
-import moment from 'moment';
+import { Doughnut } from 'vue-chartjs';
+import { options } from "@/views/history/HistoryChartOptions";
+import { HistoryModel } from "@/views/history/HistoryModel";
+import { HistoryController } from "@/views/history/HistoryController";
+import { initRows, rows, columns, pagination, pagesNumber } from "@/views/history/tableOptions";
+import {
+  filterOptions,
+  categories,
+  resetFilterOptions,
+  applyFilterOptions,
+  updateList,
+  currencyChart,
+  dataComing,
+  dataConsumption,
+  searchField,
+  isActiveFilters,
+} from "@/views/history/filterOptions";
 
-ChartJS.register(ArcElement, Tooltip, Legend, Title, BarElement, CategoryScale, LinearScale);
+const model = new HistoryModel();
+const controller = new HistoryController(model);
 
-const columns = reactive([
-  {
-    name: 'date',
-    required: true,
-    label: 'Дата',
-    align: 'left',
-    field: row => row.date,
-    format: val => `${val}`,
-    sortable: true
-  },
-  { name: 'type', align: 'left', label: 'Тип', field: 'type' },
-  { name: 'value', align: 'left', label: 'Сумма', field: 'value', sortable: true },
-  { name: 'currency', align: 'left', label: 'Валюта', field: 'currency' },
-  { name: 'category', align: 'left', label: 'Категория', field: 'category' },
-  { name: 'goal', align: 'left', label: 'Цель', field: 'goal' },
-  { name: 'comment', align: 'left', label: 'Комментарий', field: 'comment' },
-]);
-const initRows = ref([
-  {
-    date: '21.02.2023',
-    type: 'Приход',
-    value: 15000,
-    currency: '$',
-    category: 'Продукты',
-    goal: '-',
-    comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
-  },
-  {
-    date: '21.02.2023',
-    type: 'Приход',
-    value: 3000,
-    currency: '$',
-    category: 'Зарплата',
-    goal: '-',
-    comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
-  },
-  {
-    date: '23.02.2023',
-    type: 'Приход',
-    value: 13000,
-    currency: '₺',
-    category: 'Бытовые расходы',
-    goal: '-',
-    comment: '',
-  },
-  {
-    date: '17.02.2023',
-    type: 'Приход',
-    value: 4000,
-    currency: '₽',
-    category: 'Гулянки',
-    goal: '-',
-    comment: 'Комментарий 2',
-  },
-  {
-    date: '19.02.2023',
-    type: 'Расход',
-    value: 5000,
-    currency: '$',
-    category: 'Гулянки',
-    goal: '-',
-    comment: 'Комментарий 2',
-  },
-  {
-    date: '19.02.2023',
-    type: 'Расход',
-    value: 300,
-    currency: '$',
-    category: 'Продукты',
-    goal: '-',
-    comment: 'Комментарий 2',
-  },
-  {
-    date: '24.02.2023',
-    type: 'Расход',
-    value: 8000,
-    currency: '₺',
-    category: 'Продукты',
-    goal: '-',
-    comment: '',
-  },
-  {
-    date: '25.02.2023',
-    type: 'Расход',
-    value: 3000,
-    currency: '₺',
-    category: 'Продукты',
-    goal: '-',
-    comment: '',
-  },
-  {
-    date: '27.02.2023',
-    type: 'Расход',
-    value: 2500,
-    currency: '₽',
-    category: 'Обязательства',
-    goal: '-',
-    comment: 'Аренда квартиры',
-  },
-]);
-let rows = ref([
-  {
-    date: '21.02.2023',
-    type: 'Приход',
-    value: 15000,
-    currency: '$',
-    category: 'Продукты',
-    goal: '-',
-    comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
-  },
-  {
-    date: '21.02.2023',
-    type: 'Приход',
-    value: 3000,
-    currency: '$',
-    category: 'Зарплата',
-    goal: '-',
-    comment: 'Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий Комментарий ',
-  },
-  {
-    date: '23.02.2023',
-    type: 'Приход',
-    value: 13000,
-    currency: '₺',
-    category: 'Бытовые расходы',
-    goal: '-',
-    comment: '',
-  },
-  {
-    date: '17.02.2023',
-    type: 'Приход',
-    value: 4000,
-    currency: '₽',
-    category: 'Гулянки',
-    goal: '-',
-    comment: 'Комментарий 2',
-  },
-  {
-    date: '19.02.2023',
-    type: 'Расход',
-    value: 5000,
-    currency: '$',
-    category: 'Гулянки',
-    goal: '-',
-    comment: 'Комментарий 2',
-  },
-  {
-    date: '19.02.2023',
-    type: 'Расход',
-    value: 300,
-    currency: '$',
-    category: 'Продукты',
-    goal: '-',
-    comment: 'Комментарий 2',
-  },
-  {
-    date: '24.02.2023',
-    type: 'Расход',
-    value: 8000,
-    currency: '₺',
-    category: 'Продукты',
-    goal: '-',
-    comment: '',
-  },
-  {
-    date: '25.02.2023',
-    type: 'Расход',
-    value: 3000,
-    currency: '₺',
-    category: 'Продукты',
-    goal: '-',
-    comment: '',
-  },
-  {
-    date: '27.02.2023',
-    type: 'Расход',
-    value: 2500,
-    currency: '₽',
-    category: 'Обязательства',
-    goal: '-',
-    comment: 'Аренда квартиры',
-  },
-]);
+const loading = ref(false);
 
-let pagination = ref({
-  sortBy: 'desc',
-  descending: false,
-  page: 1,
-  rowsPerPage: 15,
-});
-const pagesNumber = computed(() => Math.ceil(rows.value.length / pagination.value.rowsPerPage));
+function getHistory () {
+  loading.value = true;
+  controller.getHistory().then(data => {
+    rows.value = [...data];
+    initRows.value = [...data];
 
-
-const searchField = ref('');
-watch(searchField, (value) => {
-  rows.value = ref(initRows.value.filter((el) => el.comment.toLowerCase().startsWith(value)));
-})
-
-const filterOptions = reactive({
-  startDate: '',
-  endDate: '',
-  categories: [],
-  currencies: [],
-  minSum: '',
-  maxSum: '',
-});
-const categories = reactive(['Обязательства', 'Бытовые расходы', 'Аренда квартиры', 'Коммуналка', 'Продукты', 'Еда', 'Алкоголь', 'Гулянки', 'Бары', 'Рестораны', 'Зарплата']);
-
-function resetFilterOptions () {
-  Object.keys(filterOptions).forEach((key) => {
-    switch (typeof filterOptions[key]) {
-      case 'string':
-        filterOptions[key] = '';
-        break;
-      case 'object':
-        Array.isArray(filterOptions[key] ? filterOptions[key] = [] : filterOptions[key] = {});
-        break;
-      case 'number':
-        filterOptions[key] = 0;
-        break;
-      default:
-        filterOptions[key] = null;
-        break;
-    }
-  });
-  rows.value = initRows.value;
-  applyFilterOptions();
+    updateList();
+    loading.value = false;
+  })
 }
+getHistory();
 
-const isActiveFilters = computed(() => {
-  const filters = Object.values(filterOptions);
-  return filters.filter((el) => el.length > 0 ? el : false).length > 0;
-});
-
-function applyFilterOptions () {
-  rows.value = initRows.value;
-
-  if (filterOptions.startDate) {
-    rows.value = rows.value.filter((el) => {
-      const rowDate = moment(el.date, 'DD.MM.YYYY');
-      const filterStartDate = moment(filterOptions.startDate, 'DD.MM.YYYY');
-
-      return rowDate.isAfter(filterStartDate) || rowDate.isSame(filterStartDate);
-    });
-  }
-
-  if (filterOptions.endDate) {
-    rows.value = rows.value.filter((el) => {
-      const rowDate = moment(el.date, 'DD.MM.YYYY');
-      const filterEndDate = moment(filterOptions.endDate, 'DD.MM.YYYY');
-
-      return rowDate.isBefore(filterEndDate) || rowDate.isSame(filterEndDate);
-    });
-  }
-
-  if (filterOptions.categories.length > 0) {
-    rows.value = rows.value.filter((row) => filterOptions.categories.includes(row.category));
-  }
-
-  if (filterOptions.currencies.length > 0) {
-    const currenciesNames = currencies.filter((el) => filterOptions.currencies.includes(el.name)).map((el) => el.icon);
-
-    rows.value = rows.value.filter((row) => {
-      return currenciesNames.includes(row.currency);
-    });
-  }
-
-  if (filterOptions.minSum) {
-    rows.value = rows.value.filter((el) => Number(el.value) >= Number(filterOptions.minSum));
-  }
-
-  if (filterOptions.maxSum) {
-    rows.value = rows.value.filter((el) => Number(el.value) <= Number(filterOptions.maxSum));
-  }
-
-  pagination.value = { ...pagination.value };
-  updateList(currencyChart.value);
-}
-
-
-const dataComing = reactive({
-  labels: [],
-  datasets: [
-    {
-      backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
-      data: [],
-    },
-  ]
-});
-const dataConsumption = reactive({
-  labels: [],
-  datasets: [
-    {
-      backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16'],
-      data: []
-    }
-  ]
-});
-let categoriesMatrix = reactive({
-  'Приход': {},
-  'Расход': {},
-});
-
-const currencyChart = ref('Доллар');
-
-function getListCurrentCurrency (arr, currencyChart) {
-  const currencyData = currencies.find((el) => el.name === currencyChart);
-  const filterRows = arr.filter((el) => el.currency === currencyData.icon);
-  filterRows.forEach((el) => {
-    const type = el.type;
-    const category = el.category;
-    const value = el.value;
-    if (!categoriesMatrix[type][category]) {
-      categoriesMatrix[type][category] = value;
-    } else {
-      categoriesMatrix[type][category] += value;
-    }
-  });
-  dataComing.labels = Object.keys(categoriesMatrix['Приход']);
-  dataComing.datasets[0].data = Object.values(categoriesMatrix['Приход']);
-
-  dataConsumption.labels = Object.keys(categoriesMatrix['Расход']);
-  dataConsumption.datasets[0].data = Object.values(categoriesMatrix['Расход']);
-}
-getListCurrentCurrency(rows.value, currencyChart.value);
-
-watch(currencyChart, (value) => updateList(value));
-
-function updateList (value) {
-  categoriesMatrix['Приход'] = {};
-  categoriesMatrix['Расход'] = {};
-  getListCurrentCurrency(rows.value, value);
+function deleteHistoryRow (id) {
+  controller.deleteHistoryRow(id).then(() => {
+    getHistory();
+  })
 }
 
 </script>

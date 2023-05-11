@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div v-if="loading" class="absolute-full z-max" style="background: rgba(255,255,255,0.8)">
+      <q-spinner
+          class="absolute-center"
+          color="primary"
+          size="3em"
+          :thickness="2"
+      />
+    </div>
     <div v-if="obligationsList.length > 0">
       <q-card v-for="obligation in obligationsList" :key="obligation.id" class="my-card q-mb-md relative-position">
         <q-btn
@@ -33,7 +41,7 @@
         </q-card-section>
       </q-card>
     </div>
-    <div v-else>
+    <div v-else-if="!loading && obligationsList.length === 0">
       <div class="text-h6 text-center">Здесь еще ничего нет</div>
     </div>
 
@@ -67,50 +75,30 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref} from 'vue';
 import AddButton from '@/components/buttons/AddButton';
+import {Obligation} from "@/views/obligations/ObligationsTypes";
+import {CreateObligationFields} from "@/views/obligations/ObligationsTypes";
+import {ObligationsModel} from "@/views/obligations/ObligationsModel";
+import {ObligationsController} from "@/views/obligations/ObligationsController";
 
-interface Obligation {
-  id: number,
-  name: string,
-  description: string,
-  paymentDate: string,
-  dateEnd: string | Date,
+const model = new ObligationsModel();
+const controller = new ObligationsController(model);
+
+let obligationsList = ref<Obligation[]>([]);
+const loading = ref<boolean>(false);
+
+function getCurrentObligations () {
+  loading.value = true;
+  controller.getCurrentObligations().then(data => {
+    obligationsList.value = data;
+    loading.value = false;
+  })
 }
-const obligationsList = ref<Obligation[]>([]);
-onMounted(() => {
-  obligationsList.value = [
-    {
-      id: 1,
-      name: 'Кредит',
-      description: 'Кредит на машину',
-      paymentDate: '28',
-      dateEnd: '28.04.2024',
-    },
-    {
-      id: 2,
-      name: 'Аренда',
-      description: 'Аренда за квартиру в Турции',
-      paymentDate: '20',
-      dateEnd: '20.01.2024',
-    },
-    {
-      id: 3,
-      name: 'ТО',
-      description: 'ТО по машине',
-      paymentDate: '10',
-      dateEnd: '10.05.2024',
-    },
-  ];
-});
+getCurrentObligations();
 
 function deleteObligation (id: number): void {
-  obligationsList.value = obligationsList.value.filter((el) => el.id !== id);
-}
-
-interface CreateObligationFields {
-  name: string,
-  description: string,
-  paymentDate: string,
-  dateEnd: string | Date,
+  controller.deleteObligation(id).then(() => {
+    getCurrentObligations();
+  })
 }
 
 const showModalCreateObligation = ref<boolean>(false);
@@ -122,10 +110,9 @@ let modalCreateFields = reactive<CreateObligationFields>({
 });
 
 function createObligation (): void {
-  obligationsList.value.push({
-    id: obligationsList.value.length + 1,
-    ...modalCreateFields,
-  });
+  controller.createObligation(modalCreateFields).then(() => {
+    getCurrentObligations();
+  })
 }
 
 function clearFieldsModal (): void {

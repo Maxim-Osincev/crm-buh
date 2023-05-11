@@ -1,4 +1,12 @@
 <template>
+  <div v-if="loading" class="absolute-full z-max" style="background: rgba(255,255,255,0.8)">
+    <q-spinner
+        class="absolute-center"
+        color="primary"
+        size="3em"
+        :thickness="2"
+    />
+  </div>
   <div class="row">
     <div class="row column col-md-3 col-12 q-col-gutter-md relative-position">
       <div v-for="account in accounts" :key="account.id">
@@ -10,7 +18,7 @@
                 <q-item @click="editAccountName(account)" clickable v-close-popup>
                   <q-item-section>Редактировать название счета</q-item-section>
                 </q-item>
-                <q-item @click="controller.deleteAccount(account.id)" clickable v-close-popup>
+                <q-item @click="deleteAccount(account.id)" clickable v-close-popup>
                   <q-item-section>Удалить счет</q-item-section>
                 </q-item>
               </q-list>
@@ -21,7 +29,7 @@
             <div class="text-h6 q-pr-md ellipsis">{{ account.accountName }}</div>
             <div class="text-h5 text-weight-bold q-mb-md">{{ `${account.currentValue}${getIconCurrency(account.currency)}` }}</div>
             <div>Траты в текущем месяце:</div>
-            <div class="text-weight-bold">{{ `500${getIconCurrency(account.currency)}` }}</div>
+            <div class="text-weight-bold">{{ `${getMonthExpenses(account.currency)}${getIconCurrency(account.currency)}` }}</div>
           </q-card-section>
         </q-card>
       </div>
@@ -46,7 +54,7 @@
 
       <q-card-actions align="right" class="bg-white text-teal">
         <q-btn flat label="Отмена" v-close-popup />
-        <q-btn @click="controller.createAccount(modalCreateFields)" flat label="Создать" v-close-popup />
+        <q-btn @click="createAccount(modalCreateFields)" flat label="Создать" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -62,7 +70,7 @@
       </q-card-section>
 
       <q-card-actions align="right" class="bg-white text-teal">
-        <q-btn @click="controller.saveAccountName(editingAccount)" flat label="Сохранить" v-close-popup />
+        <q-btn @click="saveAccountName(editingAccount)" flat label="Сохранить" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -75,6 +83,10 @@ import AddButton from '@/components/buttons/AddButton';
 import {AccountsModel} from "@/views/accounts/AccountsModel";
 import {AccountsController} from "@/views/accounts/AccountsController";
 import {Account, EditingAccountType} from "@/views/accounts/AccountsTypes";
+import {HistoryModel} from "@/views/history/HistoryModel";
+import {HistoryController} from "@/views/history/HistoryController";
+import {HistoryRow} from "@/views/history/HistoryTypes";
+import moment from "moment";
 
 const accounts = ref<Account[]>([]);
 const showModalCreateAccount = ref<boolean>(false);
@@ -82,14 +94,40 @@ const showModalAccountName = ref<boolean>(false);
 const editingAccount = ref<Account | null>(null);
 const modalCreateFields = ref<EditingAccountType>({
   accountName: '',
-  currency: null,
+  currency: '',
   currentValue: 0,
 });
+const loading = ref<boolean>(false);
 
-const model = new AccountsModel(accounts);
+const model = new AccountsModel();
 const controller = new AccountsController(model);
 
-controller.getCurrentAccounts();
+function getCurrentAccounts (): void {
+  loading.value = true;
+  controller.getCurrentAccounts().then(data => {
+    accounts.value = data;
+    loading.value = false;
+  })
+}
+getCurrentAccounts();
+
+function createAccount (modalCreateFields: EditingAccountType) {
+  controller.createAccount(modalCreateFields).then(() => {
+    getCurrentAccounts();
+  })
+}
+
+function deleteAccount (id: number): void {
+  controller.deleteAccount(id).then(() => {
+    getCurrentAccounts();
+  })
+}
+
+function saveAccountName (editingAccount: Account) {
+  controller.editAccount(editingAccount).then(() => {
+    getCurrentAccounts();
+  })
+}
 
 function editAccountName (account: Account): void {
   showModalAccountName.value = true;
@@ -99,7 +137,7 @@ function editAccountName (account: Account): void {
 function clearFieldsModal (): void {
   modalCreateFields.value = {
     accountName: '',
-    currency: null,
+    currency: '',
     currentValue: 0,
   };
 }
@@ -110,6 +148,19 @@ function getIconCurrency (currencyName: string): string {
     return currency.icon;
   }
   return '';
+}
+
+const history = ref<HistoryRow[]>([]);
+const historyModel = new HistoryModel();
+const historyController = new HistoryController(historyModel);
+
+historyController.getHistory().then(data => {
+  history.value = data;
+})
+function getMonthExpenses (currencyName: string): number {
+  return history.value.filter(row => {
+    return row.currency === currencyName && row.type === 'Расход' && moment(row.date, 'DD.MM.YYYY').month() === moment().month()
+  }).reduce((acc, row) => acc + +row.value, 0);
 }
 </script>
 

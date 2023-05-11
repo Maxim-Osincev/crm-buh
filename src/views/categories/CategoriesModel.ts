@@ -1,74 +1,38 @@
 import {Category} from "@/views/categories/CategoriesTypes";
-import {Ref} from "vue";
+import axios from "axios";
 
 export class CategoriesModel {
-    categories: Ref<Category[]>
-    parentNode: Ref<string>
-    nameNewCategory: Ref<string>
 
-    constructor (categories: Ref<Category[]>, parentNode: Ref<string>, nameNewCategory: Ref<string>) {
-        this.categories = categories;
-        this.parentNode = parentNode;
-        this.nameNewCategory = nameNewCategory;
+    getCurrentCategories (): Promise<Category[]> {
+        return axios.get('/categories').then(res => res.data);
     }
 
-    getCurrentCategories (): void {
-        this.categories.value = [
-            {
-                label: 'Бытовые расходы',
-                children: [
-                    { label: 'Аренда квартиры', },
-                    { label: 'Коммуналка', },
-                ]
-            },
-            {
-                label: 'Продукты',
-                children: [
-                    {
-                        label: 'Еда',
-                        children: [
-                            { label: 'Сладости', }
-                        ],
-                    },
-                    { label: 'Алкоголь', },
-                ]
-            },
-            {
-                label: 'Гулянки',
-                children: [
-                    { label: 'Бары', },
-                    { label: 'Рестораны', },
-                    { label: 'Кальянные', },
-                ]
-            }
-        ]
-    }
-
-    addCategory (): void {
-        if (!this.parentNode.value) {
-            this.categories.value.push({
-                label: this.nameNewCategory.value,
+    addCategory (nameNewCategory: string, parentNode: string): Promise<Category[]> {
+        if (!parentNode) {
+            return axios.patch('/categories', {
+                label: nameNewCategory,
                 children: [],
-            });
-        } else {
-            this.categories.value = this.editCategories(this.categories.value);
+            }).then(res => res.data);
         }
-        this.nameNewCategory.value = '';
+        return axios.patch('/categories', {
+            parentNode,
+            category: {
+                label: nameNewCategory,
+                children: [],
+            },
+        }).then(res => res.data);
     }
 
-    editCategories (arr: any[]): Category[] {
-        return arr.map((el) => {
-            if (!el.children) {
-                el.children = [];
-            }
+    getCategoriesLabels (categories: Category[]): string[] {
+        const result: string[] = [];
 
-            if (el.label === this.parentNode.value) {
-                el.children.push({ label: this.nameNewCategory.value, children: [] });
-            } else if (el.children.length > 0) {
-                el.children = this.editCategories(el.children);
+        categories.forEach((category: Category) => {
+            result.push(category.label);
+            if (category.children && category.children.length > 0) {
+                result.push(...this.getCategoriesLabels(category.children));
             }
+        })
 
-            return el;
-        });
+        return result;
     }
 }

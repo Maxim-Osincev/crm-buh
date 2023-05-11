@@ -1,12 +1,13 @@
 export interface Account {
     id: number,
-    currency: string | null,
+    currency: string,
     currentValue: number,
     accountName: string,
+    expenses: number,
 }
 
 export interface EditingAccountType {
     accountName: string,
-    currency: string | null,
+    currency: string,
     currentValue: number,
 }

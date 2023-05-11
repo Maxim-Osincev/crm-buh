@@ -8,20 +8,20 @@ export class AccountsController {
         this.model = model;
     }
 
-    getCurrentAccounts (): void {
-        this.model.getCurrentAccounts();
+    getCurrentAccounts (): Promise<Account[]> {
+        return this.model.getCurrentAccounts();
     }
 
-    createAccount (data: EditingAccountType): void {
-        this.model.createAccount(data);
+    createAccount (data: EditingAccountType): Promise<Account[]> {
+        return this.model.createAccount(data);
     }
 
-    deleteAccount (id: number): void {
-        this.model.deleteAccount(id);
+    deleteAccount (id: number): Promise<Account[]> {
+        return this.model.deleteAccount(id);
     }
 
-    saveAccountName (editingAccount: Account): void {
-        this.model.saveAccountName(editingAccount);
+    editAccount (editingAccount: Account): Promise<Account[]> {
+        return this.model.editAccount(editingAccount);
     }
 
 }

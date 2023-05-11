@@ -1,4 +1,5 @@
 import {CategoriesModel} from "@/views/categories/CategoriesModel";
+import {Category} from "@/views/categories/CategoriesTypes";
 
 export class CategoriesController {
     model: CategoriesModel
@@ -7,11 +8,15 @@ export class CategoriesController {
         this.model = model;
     }
 
-    getCurrentCategories (): void {
-        this.model.getCurrentCategories();
+    getCurrentCategories (): Promise<Category[]> {
+        return this.model.getCurrentCategories();
     }
 
-    addCategory (): void {
-        this.model.addCategory();
+    addCategory (nameNewCategory: string, parentNode: string): Promise<Category[]> {
+        return this.model.addCategory(nameNewCategory, parentNode);
+    }
+
+    getCategoriesLabels (categories: Category[]): string[] {
+        return this.model.getCategoriesLabels(categories);
     }
 }
